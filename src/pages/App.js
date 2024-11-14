@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import gitLogo from '../assets/github.png'
+import gitLogo from '../assets/github.png';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import ItemRepo from '../components/ItemRepo';
@@ -9,43 +8,49 @@ import { api } from '../services/api';
 import { Container } from './styles';
 
 function App() {
-
   const [currentRepo, setCurrentRepo] = useState('');
   const [repos, setRepos] = useState([]);
 
-
   const handleSearchRepo = async () => {
-
-    const {data} = await api.get(`repos/${currentRepo}`)
-
-    if(data.id){
-
-      const isExist = repos.find(repo => repo.id === data.id);
-
-      if(!isExist){
-        setRepos(prev => [...prev, data]);
-        setCurrentRepo('')
-        return
+    try {
+      const { data } = await api.get(`/users/${currentRepo}/repos`);
+      console.log(data);
+      
+      if (Array.isArray(data)) {
+        setRepos(data); 
       }
 
-    }
-    alert('Repositório não encontrado')
+      setCurrentRepo("");
 
-  }
+    } catch (error) {
+      console.error('Erro ao buscar repositórios:', error);
+      alert('Erro ao buscar repositórios. Verifique o nome do usuário.');
+    }
+  };
 
   const handleRemoveRepo = (id) => {
-    console.log('Removendo registro', id);
-
-    // utilizar filter.
-  }
-
+    console.log('Removendo repositório com ID:', id);
+    const updatedRepos = repos.filter((repo) => repo.id !== id);
+    setRepos(updatedRepos); 
+  };
 
   return (
     <Container>
-      <img src={gitLogo} width={72} height={72} alt="github logo"/>
+      <img src={gitLogo} width={72} height={72} alt="GitHub logo" />
       <Input value={currentRepo} onChange={(e) => setCurrentRepo(e.target.value)} />
-      <Button onClick={handleSearchRepo}/>
-      {repos.map(repo => <ItemRepo handleRemoveRepo={handleRemoveRepo} repo={repo}/>)}
+      <Button onClick={handleSearchRepo}>Buscar</Button>
+      
+      {repos.length === 0 ? (
+        <p>Nenhum repositório encontrado.</p>
+      ) : (
+        repos.map((repo) => (
+          <ItemRepo
+            key={repo.id} 
+            repo={repo}
+            handleRemoveRepo={handleRemoveRepo}
+          />
+        ))
+      )}
     </Container>
   );
 }

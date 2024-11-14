@@ -5,7 +5,7 @@ import { ButtonContainer } from './styles';
 function Button({onClick}) {
   return (
     <ButtonContainer onClick={onClick}>
-       Buscar
+        Buscar
     </ButtonContainer>
   )
 }
